@@ -14,7 +14,8 @@ enum tokenType{
     Space,
     None,
     Other,
-    OpenBrace
+    OpenBrace,
+    CloseBrace
 };
 
 enum tokenType type = None;
