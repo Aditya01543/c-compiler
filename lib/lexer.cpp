@@ -13,7 +13,8 @@ enum tokenType{
     Constant,
     Space,
     None,
-    Other
+    Other,
+    OpenBrace
 };
 
 enum tokenType type = None;
