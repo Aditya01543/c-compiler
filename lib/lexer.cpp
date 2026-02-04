@@ -2,26 +2,32 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
+#include<unordered_set>
 
 using namespace std;
 
-vector<pair<string, string>> tokens;
+unordered_set<string> keywords = {"void", "int", "return"};
+
 string token = "";
 
-enum tokenType{
+enum TokenType {
     Identifier,
+    Keyword,
     Constant,
-    Space,
-    None,
-    Other,
+    OpenParen,
+    CloseParen,
     OpenBrace,
-    CloseBrace
+    CloseBrace,
+    Semicolon,
+    None
 };
 
-enum tokenType type = None;
+enum TokenType type = None;
+
+vector<pair<string, TokenType>> tokens;
 
 bool isKeyword(string iden){
-    if(iden == "void" || iden == "int" || iden == "return"){
+    if(keywords.contains(iden)){
         return true;
     }
     return false;
@@ -29,13 +35,18 @@ bool isKeyword(string iden){
 
 void clearToken(){
     if(type == Identifier){
-        (isKeyword(token))?tokens.push_back({token, "k"}):tokens.push_back({token, "i"});
-        token = "";
+        (isKeyword(token))?tokens.push_back({token, Keyword}):tokens.push_back({token, Identifier});
     }
     if(type == Constant){
-        tokens.push_back({token, "c"});
-        token = "";
+        tokens.push_back({token, Constant});
     }
+    token = "";
+}
+
+void emitSingleCharToken(char c, TokenType t) {
+    clearToken();
+    tokens.push_back({string(1, c), t});
+    type = None;
 }
 
 int lex(const string filename){
@@ -50,86 +61,45 @@ int lex(const string filename){
     while(getline(inputFile, line)){
 
         for(char c:line){
+
             if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||  c == '_'){
 
-                if(type != Identifier){
+                if(type == None){
 
-                    if(type == Constant){
-                        cout<<"Error : invalid identifier"<<endl;
-                        return 1;
-                    }
                     type = Identifier;
 
                 }
                 token += c;
-                continue;
-            }
 
-            if(c >= '0' && c <= '9'){
-                if(type != Constant && type != Identifier){
+            }else if(c >= '0' && c <= '9'){
+                if(type == Identifier){
+                    token += c;
+                }else if(type == None){
                     type = Constant;
+                    token += c;
+                }else{
+                    cout<<"Error : invalid identifier"<<endl;
+                    return 1;
                 }
-                token += c;
-                continue;
-            }
 
-            if(c == ' ' || c == '\n'){
-                if(type != Space){
-                    clearToken();
-                    type = Space;
-                }
-                continue;
-            }
+            }else if(c == ' ' || c == '\n'){
+                clearToken();
+            }else{
 
-            if(c == '('){
-                if(type != Other){
-                    clearToken();
-                    type = Other;
+                switch(c){
+                    case '(':emitSingleCharToken(c, OpenParen); break;
+                    case ')':emitSingleCharToken(c, CloseBrace); break;
+                    case '{':emitSingleCharToken(c, OpenBrace); break;
+                    case '}':emitSingleCharToken(c, CloseBrace); break;
+                    case ';':emitSingleCharToken(c, Semicolon); break;
                 }
-                tokens.push_back({"(", "op"});
-                continue;
-            }
-
-            if(c == ')'){
-                if(type != Other){
-                    clearToken();
-                    type = Other;
-                }
-                tokens.push_back({")", "cp"});
-                continue;
-            }
-
-            if(c == '{'){
-                if(type != Other){
-                    clearToken();
-                    type = Other;
-                }
-                tokens.push_back({"{", "ob"});
-                continue;
-            }
-
-            if(c == '}'){
-                if(type != Other){
-                    clearToken();
-                    type = Other;
-                }
-                tokens.push_back({"}", "cb"});
-                continue;
-            }
-
-            if(c == ';'){
-                if(type != Other){
-                    clearToken();
-                    type = Other;
-                }
-                tokens.push_back({";", "semicolon"});
-                continue;
+                
             }
         }
 
     }
 
-    for(pair<string, string> p : tokens){
+    for(pair<string, TokenType> p : tokens){
         cout<<p.first<<" : "<<p.second<<endl;
     }
 
