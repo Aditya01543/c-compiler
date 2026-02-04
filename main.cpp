@@ -2,6 +2,7 @@
 #include <string>
 #include <cstdlib>
 #include "lib/lexer.h"
+#include "lib/parser.h"
 
 using namespace std;
 
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]) {
             
             system(cmd.c_str());
 
-            if(lex(filename) == 1){
+            if(parse(filename) == 1){
                 cout<<"Error"<<endl;
                 return 1;
             }

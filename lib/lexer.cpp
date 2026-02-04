@@ -3,24 +3,13 @@
 #include<fstream>
 #include<vector>
 #include<unordered_set>
+#include"token.h"
 
 using namespace std;
 
 unordered_set<string> keywords = {"void", "int", "return"};
 
 string token = "";
-
-enum TokenType {
-    Identifier,
-    Keyword,
-    Constant,
-    OpenParen,
-    CloseParen,
-    OpenBrace,
-    CloseBrace,
-    Semicolon,
-    None
-};
 
 enum TokenType type = None;
 
@@ -104,4 +93,28 @@ int lex(const string filename){
     }
 
     return 0;
+}
+
+int createTokens(const string filename){
+
+    if(lex(filename) == 1){
+        return 1;
+    }
+
+    ofstream outputFile("tokens.txt");
+
+    if(!outputFile.is_open()){
+        cout<<"Error opening tokens.txt"<<endl;
+    }
+
+    // for(pair<string, TokenType> p : tokens){
+    //     outputFile << p.first << endl << p.second << endl;
+    // }
+
+    outputFile.close();
+
+    tokens.clear();
+
+    return 0;
+    
 }
